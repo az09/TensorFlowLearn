@@ -25,4 +25,9 @@ run @ script.js:35
 ## Начинаем новый датасет
 Расположил категории в папке `./data_my`
 
+Установил пакет
+```shell
+npm i @tensorflow/tfjs-node --ignore-scripts
+```
+
 Размер изображений 640*480
