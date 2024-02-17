@@ -141,8 +141,6 @@ export class AntData {
   }
 }
 
-const tf = require('@tensorflow/tfjs-node');
-
 async function createDataset(dataPath) {
   const imageDataset = await tf.data
     .generator(async function* () {
