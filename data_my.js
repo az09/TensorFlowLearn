@@ -15,11 +15,12 @@
  * =============================================================================
  */
 
-const IMAGE_SIZE = 784;
-const NUM_CLASSES = 19;
-const NUM_DATASET_ELEMENTS = 5000;
+//const tf = require('@tensorflow/tfjs-node');
+const IMAGE_SIZE = 307200;
+const NUM_CLASSES = 14;
+const NUM_DATASET_ELEMENTS = 4061+421;
 
-const NUM_TRAIN_ELEMENTS = 4000;
+const NUM_TRAIN_ELEMENTS = 4061;
 const NUM_TEST_ELEMENTS = NUM_DATASET_ELEMENTS - NUM_TRAIN_ELEMENTS;
 
 const ANT_IMAGES_SPRITE_PATH =
@@ -157,8 +158,8 @@ async function createDataset(dataPath) {
 
           // Определите ваш метка класса здесь
           const label = className === 'класс_вашего_изображения' ? 1 : 0;
-Замените 'класс_вашего_изображения' на имя класса, к которому принадлежит ваше изображение.
-Также уточните свою логику меток классов в соответствии с вашими потребностями.
+//Замените 'класс_вашего_изображения' на имя класса, к которому принадлежит ваше изображение.
+//Также уточните свою логику меток классов в соответствии с вашими потребностями.
 
           yield {
             xs: normalizedImage,

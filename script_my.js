@@ -1,4 +1,4 @@
-console.log('Hello TensorFlow');
+console.log('Намчнем помолямсь TensorFlow');
 import {AntData} from './data_my.js';
 
 async function showExamples(data) {
@@ -7,21 +7,21 @@ async function showExamples(data) {
     tfvis.visor().surface({ name: 'Input Data Examples', tab: 'Input Data'});  
 
   // Get the examples
-  const examples = data.nextTestBatch(20);
+  const examples = data.nextTestBatch(10);
   const numExamples = examples.xs.shape[0];
   
   // Create a canvas element to render each example
   for (let i = 0; i < numExamples; i++) {
     const imageTensor = tf.tidy(() => {
-      // Reshape the image to 28x28 px
+      // Reshape the image to 64x48 px
       return examples.xs
         .slice([i, 0], [1, examples.xs.shape[1]])
-        .reshape([28, 28, 1]);
+        .reshape([64, 48, 1]);
     });
     
     const canvas = document.createElement('canvas');
-    canvas.width = 28;
-    canvas.height = 28;
+    canvas.width = 64;
+    canvas.height = 48;
     canvas.style = 'margin: 4px;';
     await tf.browser.toPixels(imageTensor, canvas);
     surface.drawArea.appendChild(canvas);
@@ -43,14 +43,14 @@ async function run() {
   await showConfusion(model, data);
 }
 
-document.addEventListener('DOMContentLoaded', run);
+//document.addEventListener('DOMContentLoaded', run); пока что не запускаем автоматически
 
 function getModel() {
   const model = tf.sequential();
   
-  const IMAGE_WIDTH = 28;
-  const IMAGE_HEIGHT = 28;
-  const IMAGE_CHANNELS = 1;  
+  const IMAGE_WIDTH = 640;
+  const IMAGE_HEIGHT = 480;
+  const IMAGE_CHANNELS = 3;  
   
   // In the first layer of our convolutional neural network we have 
   // to specify the input shape. Then we specify some parameters for 
@@ -84,9 +84,9 @@ function getModel() {
   // higher dimensional data to a final classification output layer.
   model.add(tf.layers.flatten());
 
-  // Our last layer is a dense layer which has 10 output units, one for each
-  // output class (i.e. 0, 1, 2, 3, 4, 5, 6, 7, 8, 9).
-  const NUM_OUTPUT_CLASSES = 10;
+  // Our last layer is a dense layer which has 14 output units, one for each
+  // output class (i.e. 01, 02, 03, 04, 05 и т.д.).
+  const NUM_OUTPUT_CLASSES = 14;
   model.add(tf.layers.dense({
     units: NUM_OUTPUT_CLASSES,
     kernelInitializer: 'varianceScaling',
@@ -113,14 +113,14 @@ async function train(model, data) {
   };
   const fitCallbacks = tfvis.show.fitCallbacks(container, metrics);
   
-  const BATCH_SIZE = 512;
-  const TRAIN_DATA_SIZE = 55000/5;
-  const TEST_DATA_SIZE = 10000/5;
+  const BATCH_SIZE = 128;
+  const TRAIN_DATA_SIZE = 4061;
+  const TEST_DATA_SIZE = 421;
 
   const [trainXs, trainYs] = tf.tidy(() => {
     const d = data.nextTrainBatch(TRAIN_DATA_SIZE);
     return [
-      d.xs.reshape([TRAIN_DATA_SIZE, 28, 28, 1]),
+      d.xs.reshape([TRAIN_DATA_SIZE, 640, 480, 3]),
       d.labels
     ];
   });
@@ -128,7 +128,7 @@ async function train(model, data) {
   const [testXs, testYs] = tf.tidy(() => {
     const d = data.nextTestBatch(TEST_DATA_SIZE);
     return [
-      d.xs.reshape([TEST_DATA_SIZE, 28, 28, 1]),
+      d.xs.reshape([TEST_DATA_SIZE, 640, 480, 1]),
       d.labels
     ];
   });
@@ -136,17 +136,17 @@ async function train(model, data) {
   return model.fit(trainXs, trainYs, {
     batchSize: BATCH_SIZE,
     validationData: [testXs, testYs],
-    epochs: 10,
+    epochs: 17,
     shuffle: true,
     callbacks: fitCallbacks
   });
 }
 
-const classNames = ['Zero', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
+const classNames = ['08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21'];
 
 function doPrediction(model, data, testDataSize = 500) {
-  const IMAGE_WIDTH = 28;
-  const IMAGE_HEIGHT = 28;
+  const IMAGE_WIDTH = 640;
+  const IMAGE_HEIGHT = 480;
   const testData = data.nextTestBatch(testDataSize);
   const testxs = testData.xs.reshape([testDataSize, IMAGE_WIDTH, IMAGE_HEIGHT, 1]);
   const labels = testData.labels.argMax(-1);
@@ -155,7 +155,6 @@ function doPrediction(model, data, testDataSize = 500) {
   testxs.dispose();
   return [preds, labels];
 }
-
 
 async function showAccuracy(model, data) {
   const [preds, labels] = doPrediction(model, data);

@@ -6,10 +6,51 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TensorFlow.js Tutorial</title>
 
+  <style>
+    body {
+      font-family: arial, sans-serif;
+      margin: 2em;
+    }
+    h1 {
+      font-style: italic;
+      color: #FF6F00;
+    }
+    canvas {
+      display: block;
+      width: 640px;
+      height: 480px;
+      margin: 10px auto 5px auto;
+      zoom: 6;
+    }
+    p#prediction {
+      font-size: 20pt;
+      margin: 10px;
+      text-align: center;
+    }
+    p#prediction.correct {
+      border: 3px solid #00FF00;
+      color: #00FF00;
+      font-size: 100pt;
+    }
+    p#prediction.wrong {
+      border: 3px solid #FF0000;
+      color: #FF0000;
+      font-size: 100pt;
+    }
+    p {margin: 5px;}
+    .box {
+      width: 45%;
+      margin: 1%;
+      border: 1px dashed #cdcdcd;
+      display: inline-block;
+      min-height: 400px;
+      text-align: center;
+      float: left;
+    }
+  </style>
   <!-- Import TensorFlow.js -->
-  <script>
-    const tf = require('@tensorflow/tfjs-node');
-  </script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.0.0/dist/tf.min.js"></script>
+
   <!-- Import tfjs-vis -->
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis@1.0.2/dist/tfjs-vis.umd.min.js"></script>
 
@@ -22,5 +63,19 @@
 </head>
 
 <body>
+  <h1>TensorFlow.js daypart classifier</h1>
+  <p>См. консоль, там много интересного</p>
+
+  <section class="box">
+    <h2>Картинка для анализа</h2>
+    <p>Цветная 640х480 с веб-камеры</p>
+    <canvas id="canvas" width="640px" height="480px"></canvas>
+  </section>
+  <section class="box">
+    <h2>Предсказание</h2>
+    <p>Ниже будет показано к какой категории daypart натренированная TensorFlow.js нейросеть относит картинку выше</p>
+    <p>Красным так себе предсказание, зеленое - норм прогноз.</p>
+    <p id="prediction">Модель на тренировке. Обождите...</p>
+  </section>
 </body>
 </html>
