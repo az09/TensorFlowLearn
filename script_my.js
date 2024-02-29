@@ -7,7 +7,7 @@ async function showExamples(data) {
     tfvis.visor().surface({ name: 'Input Data Examples', tab: 'Input Data'});  
 
   // Get the examples
-  const examples = data.nextTestBatch(10);
+  const examples = data.nextTestBatch(1);
   const numExamples = examples.xs.shape[0];
   
   // Create a canvas element to render each example
@@ -19,22 +19,59 @@ async function showExamples(data) {
         .reshape([64, 48, 1]);
     });
     
-    const canvas = document.createElement('canvas');
-    canvas.width = 64;
-    canvas.height = 48;
-    canvas.style = 'margin: 4px;';
+    const canvas = document.getElementById('canvas');
+    //canvas.width = 64;
+    //canvas.height = 48;
+    //canvas.style = 'margin: 4px;';
     await tf.browser.toPixels(imageTensor, canvas);
-    surface.drawArea.appendChild(canvas);
+    //surface.drawArea.appendChild(canvas);
 
     imageTensor.dispose();
   }
 }
 
-async function run() {  
-  const data = new AntData();
-  await data.load();
-  await showExamples(data);
+async function createDataset(dataPath) {
+  const imageDataset = await tf.data
+    .generator(async function* () {
+      const classes = fs.readdirSync(dataPath);
 
+      for (const className of classes) {
+        const classPath = path.join(dataPath, className);
+
+        for (const imageFileName of fs.readdirSync(classPath)) {
+          const imagePath = path.join(classPath, imageFileName);
+          const imageData = fs.readFileSync(imagePath);
+          const imageTensor = tf.node.decodeImage(imageData);
+          const normalizedImage = tf.image.resizeBilinear(imageTensor, [targetSize, targetSize]).div(255.0);
+
+          // Определите ваш метка класса здесь
+          const label = className === 'класс_вашего_изображения' ? 1 : 0;
+//Замените 'класс_вашего_изображения' на имя класса, к которому принадлежит ваше изображение.
+//Также уточните свою логику меток классов в соответствии с вашими потребностями.
+
+          yield {
+            xs: normalizedImage,
+            ys: tf.oneHot(label, classes.length),
+          };
+        }
+      }
+    })
+    .shuffle(1000) // Перемешивание данных
+    .batch(32); // Укажите размер батча
+
+  return imageDataset;
+}
+
+// Теперь вы можете использовать датасет для обучения вашей нейронной сети
+
+async function run() {
+// Использование функции для создания датасета
+  const datasetPath = './data_my/';
+  const dataset = await createDataset(datasetPath);
+  //const data = new AntData();
+  //await data.load();
+  await showExamples(dataset);
+  return;
   const model = getModel();
   tfvis.show.modelSummary({name: 'Model Architecture', tab: 'Model'}, model);
     
@@ -43,7 +80,7 @@ async function run() {
   await showConfusion(model, data);
 }
 
-//document.addEventListener('DOMContentLoaded', run); пока что не запускаем автоматически
+document.addEventListener('DOMContentLoaded', run); //пробуем запускать автоматически
 
 function getModel() {
   const model = tf.sequential();
