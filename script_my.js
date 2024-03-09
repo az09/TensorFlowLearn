@@ -34,6 +34,7 @@ async function createDataset(dataPath) {
   const imageDataset = await tf.data
     .generator(async function* () {
       const classes = fs.readdirSync(dataPath);
+      //следует убрать test
 
       for (const className of classes) {
         const classPath = path.join(dataPath, className);
